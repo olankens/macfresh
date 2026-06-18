@@ -1240,12 +1240,9 @@ update_chromium_debug() {
 # @define Update claude-code
 update_claude_code() {
 
-  # Handle parameters
-  local withzai=${1:-false}
-
   # Handle dependencies
   update_nodejs
-  update_brew ccusage jq sponge
+  update_brew jq sponge
 
   # Update package
   npm install -g @anthropic-ai/claude-code
@@ -1259,13 +1256,27 @@ update_claude_code() {
   local configs="$HOME/.claude/settings.json" && mkdir -p "$(dirname "$configs")"
   [[ -s "$configs" ]] || echo "{}" >"$configs"
   jq '.includeCoAuthoredBy = false' "$configs" | sponge "$configs"
-  if [[ "$withzai" == "true" ]]; then
-    jq '.env = {
-			ANTHROPIC_AUTH_TOKEN: (.env.ANTHROPIC_AUTH_TOKEN // "your_zai_api_key"),
-			ANTHROPIC_BASE_URL: "https://api.z.ai/api/anthropic",
-			API_TIMEOUT_MS: "3000000"
-		}' "$configs" | sponge "$configs"
-  fi
+
+}
+
+# @define Update claude-code-zai
+update_claude_code_zai() {
+
+  # Handle dependencies
+  update_claude_code
+
+  # Change settings
+  local configs="$HOME/.claude/settings.json" && mkdir -p "$(dirname "$configs")"
+  [[ -s "$configs" ]] || echo "{}" >"$configs"
+  jq '.env = {
+    ANTHROPIC_AUTH_TOKEN: (.env.ANTHROPIC_AUTH_TOKEN // "your_zai_api_key"),
+    ANTHROPIC_BASE_URL: "https://api.z.ai/api/anthropic",
+    API_TIMEOUT_MS: "3000000",
+    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: 1,
+    ANTHROPIC_DEFAULT_OPUS_MODEL: "glm-5.2",
+    ANTHROPIC_DEFAULT_SONNET_MODEL: "glm-4.7",
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: "glm-4.5-air"
+  }' "$configs" | sponge "$configs"
 
 }
 
@@ -2214,6 +2225,7 @@ main() {
     "update_chromium"
     "update_chromium_debug"
     "update_claude_code"
+    "update_claude_code_zai"
     # "update_codex"
     "update_crossover"
     "update_discord"
