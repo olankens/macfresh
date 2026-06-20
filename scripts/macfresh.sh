@@ -146,7 +146,7 @@ change_icon() {
 	update_brew curl fileicon
 
 	# Change icon
-	local address="https://github.com/olankens/nightwyn/raw/refs/heads/main/source/$distant/$distant.icns"
+	local address="https://github.com/olankens/obscured/raw/refs/heads/main/source/$distant/$distant.icns"
 	local picture="$(mktemp -d)/$(basename "$address")"
 	curl -LA "mozilla/5.0" "$address" -o "$picture"
 	fileicon set "$element" "$picture" 2>/dev/null || sudo fileicon set "$element" "$picture"
@@ -1555,9 +1555,6 @@ update_iina() {
 	expand_archive "$archive" "$deposit"
 	"$deposit/openwith" com.colliderli.iina mkv mov mp4 avi
 
-	# Change appearance
-	change_icon "iina" "/Applications/IINA.app"
-
 }
 
 # @define Update intellij-idea
@@ -1854,6 +1851,31 @@ update_pycharm() {
 
 	# Change appearance
 	change_icon "pycharm" "/Applications/PyCharm.app"
+
+}
+
+# @define Update recordly
+update_recordly() {
+
+	# Handle dependencies
+	brew install curl grep jq
+	brew upgrade curl grep jq
+
+	# Update package
+	# local present="$([[ -d "/Applications/Recordly.app" ]] && echo "true" || echo "false")"
+	local address="https://api.github.com/repos/webadderallorg/Recordly/releases/latest"
+	local version=$(curl -LA "mozilla/5.0" "$address" | jq -r ".tag_name" | tr -d "v")
+	local current=$(gather_version "/*ppl*/Recordly*")
+	autoload is-at-least
+	local updated=$(is-at-least "$version" "$current" && echo "true" || echo "false")
+	if [[ "$updated" == "false" ]]; then
+		local address="https://github.com/webadderallorg/Recordly/releases"
+		local address="$address/download/v$version/Recordly-arm64.dmg"
+		local package=$(mktemp -d)/$(basename "$address") && curl -LA "mozilla/5.0" "$address" -o "$package"
+		hdiutil attach "$package" -noautoopen -nobrowse
+		ditto /Volumes/Recordly*/Recordly*.app /Applications/Recordly.app
+		hdiutil detach /Volumes/Recordly*
+	fi
 
 }
 
@@ -2201,15 +2223,19 @@ main() {
 	[[ "$ZSH_EVAL_CONTEXT" != *:file || "$TERM_PROGRAM" == "vscode" || $(ps -p $PPID -o comm=) =~ idea ]] || return 0
 
 	read -r -d "" welcome <<-EOD
-		#:  :#   ##    .###: ###### #####  ######   ###: #    #
-		##  ##   ##   .#: .# #      #    # #      #   .# #    #
-		##..##  :##:  #:     #      #    # #      #      #    #
-		#:  :#   ::   #      #      #   :# #      # .    #    #
-		# ## #  #..#  #      ###### #####  ######   ##   ######
-		# #  #  #  #  #      #      #  .#: #           # #    #
-		#    # :####: #:     #      #   .# #           # #    #
-		#    #  :  :  .#: .  #      #    # #      #.   # #    #
-		#    # #.  .#  :###: #      #    : ###### :####. #    #
+		#################################################################
+		#                                                               #
+		#    #:  :#   ##    .###: ###### #####  ######   ###: #    #    #
+		#    ##  ##   ##   .#: .# #      #    # #      #   .# #    #    #
+		#    ##..##  :##:  #:     #      #    # #      #      #    #    #
+		#    #:  :#   ::   #      #      #   :# #      # .    #    #    #
+		#    # ## #  #..#  #      ###### #####  ######   ##   ######    #
+		#    # #  #  #  #  #      #      #  .#: #           # #    #    #
+		#    #    # :####: #:     #      #   .# #           # #    #    #
+		#    #    #  :  :  .#: .  #      #    # #      #.   # #    #    #
+		#    #    # #.  .#  :###: #      #    : ###### :####. #    #    #
+		#                                                               #
+		#################################################################
 	EOD
 
 	local country="Europe/Brussels"
@@ -2219,23 +2245,23 @@ main() {
 		"update_homebrew"
 		"update_system"
 		#
-		"update_air"
-		"update_android_cmdline"
+		# "update_air"
+		# "update_android_cmdline"
 		"update_android_studio"
-		"update_antigravity"
+		# "update_antigravity"
 		"update_calibre"
 		"update_chromium"
-		"update_chromium_debug"
+		# "update_chromium_debug"
 		"update_claude_code"
-		"update_claude_code_zai"
+		# "update_claude_code_zai"
 		# "update_codex"
-		"update_crossover"
-		"update_discord"
+		# "update_crossover"
+		# "update_discord"
 		"update_docker"
-		"update_draw_things"
-		"update_figma"
+		# "update_draw_things"
+		# "update_figma"
 		"update_flutter"
-		"update_frame0"
+		# "update_frame0"
 		"update_git 'main' 'olankens' 'olankens@users.noreply.github.com'"
 		# "update_handy"
 		"update_icon_composer"
@@ -2249,24 +2275,25 @@ main() {
 		"update_mole"
 		"update_nightlight"
 		"update_nodejs"
-		"update_notion"
+		# "update_notion"
 		"update_pearcleaner"
 		# "update_postgresql"
 		# "update_pycharm"
 		# "update_orca"
-		"update_temurin"
-		"update_transmission"
+		"update_recordly"
+		# "update_temurin"
+		# "update_transmission"
 		"update_utm"
-		"update_webstorm"
-		"update_xcode"
+		# "update_webstorm"
+		# "update_xcode"
 		#
 		"update_devtools_android"
 		"update_devtools_angular"
-		"update_devtools_apple"
+		# "update_devtools_apple"
 		"update_devtools_astro"
 		"update_devtools_bash"
 		"update_devtools_flutter"
-		"update_devtools_kmm"
+		# "update_devtools_kmm"
 		"update_devtools_nestjs"
 		"update_devtools_spring"
 		#
