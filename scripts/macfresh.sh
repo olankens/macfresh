@@ -1016,7 +1016,7 @@ update_appearance() {
 	defaults write com.apple.dock orientation bottom
 	defaults write com.apple.dock show-recents -bool false
 	defaults write com.apple.dock size-immutable -bool yes
-	defaults write com.apple.dock tilesize -int 38
+	defaults write com.apple.dock tilesize -int 36
 	defaults write com.apple.dock wvous-bl-corner -int 0
 	defaults write com.apple.dock wvous-br-corner -int 0
 	defaults write com.apple.dock wvous-tl-corner -int 0
@@ -1026,34 +1026,45 @@ update_appearance() {
 	defaults delete com.apple.dock persistent-apps
 	defaults delete com.apple.dock persistent-others
 	append_dock_application "/Applications/Chromium.app"
-	append_dock_application "/Applications/Discord.app"
+	# append_dock_application "/Applications/Discord.app"
 	append_dock_application "/Applications/JDownloader 2/JDownloader2.app"
 	append_dock_application "/Applications/Transmission.app"
+	# --
 	append_dock_application "/Applications/Calibre.app"
-	append_dock_application "/Applications/Notion.app"
-	append_dock_application "/Applications/Air.app"
-	append_dock_application "/Applications/Orca.app"
-	append_dock_application "/Applications/Antigravity IDE.app"
+	# append_dock_application "/Applications/Notion.app"
+	# --
+	# append_dock_application "/Applications/Antigravity IDE.app"
 	# append_dock_application "/Applications/Visual Studio Code.app"
+	append_dock_application "/Applications/VSCodium.app"
+	# --
 	append_dock_application "/Applications/IntelliJ IDEA.app"
-	#  append_dock_application "/Applications/PyCharm.app"
-	append_dock_application "/Applications/WebStorm.app"
 	append_dock_application "/Applications/Android Studio.app"
 	append_dock_application "/Applications/Xcode.app"
+	# --
+	append_dock_application "/Applications/Air.app"
+	append_dock_application "/Applications/Conductor.app"
+	append_dock_application "/Applications/Orca.app"
+	# --
 	append_dock_application "/Applications/Figma.app"
-	append_dock_application "/Applications/Frame0.app"
+	# append_dock_application "/Applications/Frame0.app"
 	append_dock_application "/Applications/Icon Composer.app"
+	# --
+	# append_dock_application "/Applications/CapCut.app"
 	append_dock_application "/Applications/IINA.app"
+	append_dock_application "/Applications/Recordly.app"
+	# --
 	append_dock_application "/Applications/CrossOver.app"
 	append_dock_application "/Applications/Pearcleaner.app"
 	append_dock_application "/Applications/UTM.app"
+	# append_dock_application "/System/Applications/Utilities/Activity Monitor.app"
+	# append_dock_application "/System/Applications/Utilities/Screenshot.app"
 	append_dock_application "/System/Applications/Utilities/Terminal.app"
-	append_dock_folder "$HOME/Downloads" 1 1 2
-	append_dock_folder "$HOME/Documents" 1 1 2
+	append_dock_folder "$HOME/Downloads" 1 0 2
+	append_dock_folder "$HOME/Documents" 1 0 2
 	killall Dock
 
 	# Change wallpaper
-	change_wallpaper "https://github.com/olankens/codewall/raw/refs/heads/main/src/node-02.avif"
+	change_wallpaper "https://github.com/olankens/devpaper/raw/HEAD/source/java-03.avif"
 
 }
 
@@ -1067,8 +1078,8 @@ update_antigravity() {
 	update_cask antigravity-ide
 
 	# Update extensions
-	agy-ide --install-extension "dbaeumer.vscode-eslint" --force
-	agy-ide --install-extension "esbenp.prettier-vscode" --force
+	sleep 5 && agy-ide --install-extension "dbaeumer.vscode-eslint" --force
+	sleep 5 && agy-ide --install-extension "esbenp.prettier-vscode" --force
 
 	# Change globals
 	local configs="$HOME/Library/Application Support/Antigravity IDE/User/settings.json"
@@ -1118,6 +1129,14 @@ update_calibre() {
 	sudo codesign --deep --sign - /Applications/calibre.app
 	sudo mv /Applications/calibre.app /Applications/Calibre.app
 	change_icon "calibre" "/Applications/Calibre.app"
+
+}
+
+# @define Update capcut
+update_capcut() {
+
+	# Change appearance
+	change_icon "capcut" "/Applications/CapCut.app"
 
 }
 
@@ -1290,12 +1309,26 @@ update_codex() {
 
 }
 
+# @define Update conductor
+update_conductor() {
+
+	# Update package
+	update_cask conductor
+
+	# TODO: Change settings
+
+	# Change appearance
+	change_icon "conductor" "/Applications/Conductor.app"
+
+}
+
 # @define Update crossover
 update_crossover() {
 
 	# Update package
 	local present="$([[ -d "/Applications/CrossOver.app" ]] && echo true || echo false)"
 	update_cask crossover
+	xattr -rd com.apple.quarantine "/Applications/CrossOver.app"
 
 	# Change settings
 	defaults write com.codeweavers.CrossOver AskForRatings -bool false
@@ -1455,22 +1488,18 @@ update_git() {
 
 }
 
-# @define Update handy
-update_handy() {
+# @define Update headroom
+update_headroom() {
+
+	# Handle dependencies
+	update_brew pipx
 
 	# Update package
-	local present="$([[ -d "/Applications/Handy.app" ]] && echo "true" || echo "false")"
-	update_cask handy
+	pipx ensurepath
+	pipx upgrade headroom-ai || pipx install headroom-ai
 
-	# Finish install
-	[[ "$present" == "false" ]] && invoke_once "Handy"
-
-	# Change settings
-	local configs="$HOME/Library/Application Support/com.pais.handy/settings_store.json"
-	jq '.settings.autostart_enabled = true' "$configs" | sponge "$configs"
-	jq '.settings.overlay_position = "top"' "$configs" | sponge "$configs"
-	jq '.settings.push_to_talk = false' "$configs" | sponge "$configs"
-	jq '.settings.start_hidden = true' "$configs" | sponge "$configs"
+	# TODO: Update settings
+	source "$HOME/.zshrc"
 
 }
 
@@ -1794,10 +1823,23 @@ update_notion() {
 # @define Update orca
 update_orca() {
 
+	# Handle dependencies
+	update_brew curl fileicon
+
 	# Update package
 	update_cask stablyai/orca/orca
 
 	# TODO: Change settings
+
+	# Change appearance
+	local address="https://github.com/olankens/obscured/raw/refs/heads/main/source/orca/orca.icns"
+	local picture="$(mktemp -d)/$(basename "$address")"
+	curl -LA "mozilla/5.0" "$address" -o "$picture"
+	fileicon set "/Applications/Orca.app" "$picture" || sudo !!
+	fileicon set "/Applications/Orca.app/Contents/Resources/Orca Computer Use.app" "$picture" || sudo !!
+	cp "$picture" "/Applications/Orca.app/Contents/Resources/icon.icns"
+	local sitting="/Applications/Orca.app/Contents/Resources/app.asar.unpacked/resources/icon.png"
+	sips -Z 128 -s format png "$picture" --out "$sitting"
 
 }
 
@@ -1827,33 +1869,6 @@ update_postgresql() {
 
 }
 
-# @define Update pycharm
-update_pycharm() {
-
-	# Handle parameters
-	local deposit=${1:-$HOME/Documents}
-
-	# Update package
-	local present="$([[ -d "/Applications/PyCharm.app" ]] && echo true || echo false)"
-	update_cask pycharm
-	pkill -9 -f "PyCharm"
-
-	# Finish install
-	[[ "$present" == "false" ]] && invoke_once "PyCharm"
-
-	# Change settings
-	change_jetbrains_deposit "JetBrains/PyCharm" "$deposit"
-	change_jetbrains_scheme "JetBrains/PyCharm" "Islands Dark"
-	change_jetbrains_theme "JetBrains/PyCharm" "Islands Dark"
-
-	# Update plugins
-	pycharm installPlugins "org.jetbrains.junie"
-
-	# Change appearance
-	change_icon "pycharm" "/Applications/PyCharm.app"
-
-}
-
 # @define Update recordly
 update_recordly() {
 
@@ -1876,6 +1891,9 @@ update_recordly() {
 		ditto /Volumes/Recordly*/Recordly*.app /Applications/Recordly.app
 		hdiutil detach /Volumes/Recordly*
 	fi
+
+	# Change appearance
+	change_icon "recordly" "/Applications/Recordly.app"
 
 }
 
@@ -1976,31 +1994,41 @@ update_utm() {
 
 }
 
-# @define Update webstorm
-update_webstorm() {
+# @define Update vscodium
+update_vscodium() {
 
-	# Handle parameters
-	local deposit=${1:-$HOME/Documents}
+	# Handle dependencies
+	update_brew font-jetbrains-mono jq sponge
 
 	# Update package
-	local present="$([[ -d "/Applications/WebStorm.app" ]] && echo true || echo false)"
-	update_cask webstorm
-	pkill -9 -f "WebStorm"
+	update_cask vscodium
 
-	# Finish install
-	[[ "$present" == "false" ]] && invoke_once "WebStorm"
+	# Update extensions
+	# INFO: It generates the required file structure to edit settings
+	sleep 5 && codium --install-extension "dbaeumer.vscode-eslint" --force
+	sleep 5 && codium --install-extension "esbenp.prettier-vscode" --force
+
+	# Change globals
+	local configs="$HOME/Library/Application Support/VSCodium/User/settings.json"
+	[[ -s "$configs" ]] || echo "{}" >"$configs"
+	jq '."chat.disableAIFeatures" = true' "$configs" | sponge "$configs"
+	jq '."editor.guides.bracketPairs" = "active"' "$configs" | sponge "$configs"
+	jq '."editor.minimap.enabled" = false' "$configs" | sponge "$configs"
+	jq '."security.workspace.trust.enabled" = false' "$configs" | sponge "$configs"
+	jq '."telemetry.telemetryLevel" = "crash"' "$configs" | sponge "$configs"
+	jq '."update.mode" = "none"' "$configs" | sponge "$configs"
+	jq '."window.zoomLevel" = -0.15' "$configs" | sponge "$configs"
 
 	# Change settings
-	change_jetbrains_deposit "JetBrains/WebStorm" "$deposit"
-	change_jetbrains_scheme "JetBrains/WebStorm" "Islands Dark"
-	change_jetbrains_theme "JetBrains/WebStorm" "Islands Dark"
-
-	# Update plugins
-	webstorm installPlugins "io.github.lukmccall.better-exclude"
-	webstorm installPlugins "org.jetbrains.junie"
-
-	# Change appearance
-	change_icon "webstorm" "/Applications/WebStorm.app"
+	local configs="$HOME/Library/Application Support/VSCodium/User/settings.json"
+	local factors="[astro][css][javascript][javascriptreact][json][jsonc][html][md][typescript][typescriptreact][vue]"
+	[[ -s "$configs" ]] || echo "{}" >"$configs"
+	jq ".\"$factors\".\"editor.codeActionsOnSave\".\"source.fixAll\" = \"explicit\"" "$configs" | sponge "$configs"
+	jq ".\"$factors\".\"editor.defaultFormatter\" = \"esbenp.prettier-vscode\"" "$configs" | sponge "$configs"
+	jq ".\"$factors\".\"editor.formatOnSave\" = true" "$configs" | sponge "$configs"
+	jq ".\"$factors\".\"editor.linkedEditing\" = true" "$configs" | sponge "$configs"
+	jq ".\"$factors\".\"editor.tabSize\" = 2" "$configs" | sponge "$configs"
+	jq ".\"$factors\".\"prettier.printWidth\" = 100" "$configs" | sponge "$configs"
 
 }
 
@@ -2066,10 +2094,11 @@ update_devtools_angular() {
 	local datadir="${1:-$HOME/Library/Application Support/Chromium Debug}"
 
 	# Handle dependencies
-	update_antigravity
+	# update_antigravity
 	update_chromium_debug
+	update_intellij_idea
 	update_nodejs
-	update_webstorm
+	update_vscodium
 
 	# Update angular
 	export NG_CLI_ANALYTICS="ci" && npm i -g @angular/cli
@@ -2080,17 +2109,24 @@ update_devtools_angular() {
 	source "$HOME/.zshrc"
 
 	# Update antigravity
-	agy-ide --install-extension "angular.ng-template"
-	agy-ide --install-extension "bradlc.vscode-tailwindcss"
-	agy-ide --install-extension "mikestead.dotenv"
-	agy-ide --install-extension "usernamehw.errorlens"
-	agy-ide --install-extension "yoavbls.pretty-ts-errors"
+	# sleep 5 && agy-ide --install-extension "angular.ng-template" --force
+	# sleep 5 && agy-ide --install-extension "bradlc.vscode-tailwindcss" --force
+	# sleep 5 && agy-ide --install-extension "mikestead.dotenv" --force
+	# sleep 5 && agy-ide --install-extension "usernamehw.errorlens" --force
+	# sleep 5 && agy-ide --install-extension "yoavbls.pretty-ts-errors" --force
+
+	# Update codium
+	sleep 5 && codium --install-extension "angular.ng-template" --force
+	sleep 5 && codium --install-extension "bradlc.vscode-tailwindcss" --force
+	sleep 5 && codium --install-extension "mikestead.dotenv" --force
+	sleep 5 && codium --install-extension "usernamehw.errorlens" --force
+	sleep 5 && codium --install-extension "yoavbls.pretty-ts-errors" --force
 
 	# Update chromium
 	update_chromium_extension "ienfalfjdbdpebioblfackkekamfmbnh" "$datadir" # angular-devtools
 	update_chromium_extension "kgpbgfjgjanmdcoefmofbmlhhkmeipng" "$datadir" # angulariad
 
-	# Update webstorm
+	# Update idea
 	idea installPlugins "com.github.ahmedwelhakim.ngxtranslateintellisense"
 	idea installPlugins "com.github.dinbtechit.ngxs"
 
@@ -2109,28 +2145,36 @@ update_devtools_apple() {
 update_devtools_astro() {
 
 	# Handle dependencies
-	update_antigravity
+	# update_antigravity
 	update_chromium_debug
+	update_intellij_idea
 	update_nodejs
-	update_webstorm
+	update_vscodium
 
 	# Update antigravity
-	agy-ide --install-extension "astro-build.astro-vscode"
+	# sleep 5 && agy-ide --install-extension "astro-build.astro-vscode" --force
 
-	# Update webstorm
-	webstorm installPlugins "org.jetbrains.plugins.astro"
+	# Update codium
+	sleep 5 && codium --install-extension "astro-build.astro-vscode" --force
+
+	# Update idea
+	idea installPlugins "org.jetbrains.plugins.astro"
 
 }
 
 update_devtools_bash() {
 
 	# Handle dependencies
-	update_antigravity
+	# update_antigravity
 	update_intellij_idea
+	update_vscodium
 	update_brew shellcheck shfmt
 
 	# Update antigravity
-	agy-ide --install-extension "mads-hartmann.bash-ide-vscode"
+	# sleep 5 && agy-ide --install-extension "mads-hartmann.bash-ide-vscode" --force
+
+	# Update codium
+	sleep 5 && codium --install-extension "mads-hartmann.bash-ide-vscode" --force
 
 	# Update idea
 	idea installPlugins "pro.bashsupport"
@@ -2142,14 +2186,24 @@ update_devtools_flutter() {
 	# Handle dependencies
 	update_devtools_android
 	update_devtools_apple
-	update_antigravity
+	# update_antigravity
 	update_flutter
+	update_vscodium
 
 	# Update antigravity
-	agy-ide --install-extension "dart-code.flutter"
-	agy-ide --install-extension "pflannery.vscode-versionlens"
-	agy-ide --install-extension "usernamehw.errorlens"
-	local configs="$HOME/Library/Application Support/Antigravity IDE/User/settings.json"
+	# sleep 5 && agy-ide --install-extension "dart-code.flutter" --force
+	# sleep 5 && agy-ide --install-extension "pflannery.vscode-versionlens" --force
+	# sleep 5 && agy-ide --install-extension "usernamehw.errorlens" --force
+	# local configs="$HOME/Library/Application Support/Antigravity IDE/User/settings.json"
+	# jq '."[dart]"."editor.codeActionsOnSave"."source.fixAll" = "explicit"' "$configs" | sponge "$configs"
+	# jq '."[dart]"."editor.codeActionsOnSave"."source.organizeImports" = "explicit"' "$configs" | sponge "$configs"
+	# jq '."[dart]"."editor.defaultFormatter" = "Dart-Code.dart-code"' "$configs" | sponge "$configs"
+
+	# Update codium
+	sleep 5 && codium --install-extension "dart-code.flutter" --force
+	sleep 5 && codium --install-extension "pflannery.vscode-versionlens" --force
+	sleep 5 && codium --install-extension "usernamehw.errorlens" --force
+	local configs="$HOME/Library/Application Support/VSCodium/User/settings.json"
 	jq '."[dart]"."editor.codeActionsOnSave"."source.fixAll" = "explicit"' "$configs" | sponge "$configs"
 	jq '."[dart]"."editor.codeActionsOnSave"."source.organizeImports" = "explicit"' "$configs" | sponge "$configs"
 	jq '."[dart]"."editor.defaultFormatter" = "Dart-Code.dart-code"' "$configs" | sponge "$configs"
@@ -2180,32 +2234,44 @@ update_devtools_kmm() {
 update_devtools_nestjs() {
 
 	# Handle dependencies
-	update_antigravity
+	# update_antigravity
 	update_docker
 	update_nodejs
-	update_webstorm
+	update_intellij_idea
+	update_vscodium
 
 	# Update antigravity
-	agy-ide --install-extension "mikestead.dotenv"
-	agy-ide --install-extension "usernamehw.errorlens"
-	agy-ide --install-extension "yoavbls.pretty-ts-errors"
+	# sleep 5 && agy-ide --install-extension "mikestead.dotenv" --force
+	# sleep 5 && agy-ide --install-extension "usernamehw.errorlens" --force
+	# sleep 5 && agy-ide --install-extension "yoavbls.pretty-ts-errors" --force
 
-	# Update webstorm
-	webstorm installPlugins "com.github.dinbtechit.jetbrainsnestjs"
+	# Update codium
+	sleep 5 && codium --install-extension "mikestead.dotenv" --force
+	sleep 5 && codium --install-extension "usernamehw.errorlens" --force
+	sleep 5 && codium --install-extension "yoavbls.pretty-ts-errors" --force
+
+	# Update idea
+	idea installPlugins "com.github.dinbtechit.jetbrainsnestjs"
 
 }
 
 update_devtools_spring() {
 
 	# Handle dependencies
-	update_antigravity
+	# update_antigravity
 	update_docker
 	update_intellij_idea
+	update_vscodium
 	update_brew spring-io/tap/spring-boot
 
 	# Update antigravity
-	agy-ide --install-extension "vmware.vscode-spring-boot"
-	local configs="$HOME/Library/Application Support/Antigravity IDE/User/settings.json"
+	# sleep 5 && agy-ide --install-extension "vmware.vscode-spring-boot" --force
+	# local configs="$HOME/Library/Application Support/Antigravity IDE/User/settings.json"
+	# jq '."redhat.telemetry.enabled" = false' "$configs" | sponge "$configs"
+
+	# Update codium
+	sleep 5 && codium --install-extension "vmware.vscode-spring-boot" --force
+	local configs="$HOME/Library/Application Support/VSCodium/User/settings.json"
 	jq '."redhat.telemetry.enabled" = false' "$configs" | sponge "$configs"
 
 	# Update idea
@@ -2245,46 +2311,47 @@ main() {
 		"update_homebrew"
 		"update_system"
 		#
-		# "update_air"
-		# "update_android_cmdline"
+		"update_air"
+		"update_android_cmdline"
 		"update_android_studio"
 		# "update_antigravity"
 		"update_calibre"
+		"update_capcut"
 		"update_chromium"
-		# "update_chromium_debug"
+		"update_chromium_debug"
 		"update_claude_code"
-		# "update_claude_code_zai"
-		# "update_codex"
-		# "update_crossover"
-		# "update_discord"
+		"update_claude_code_zai"
+		"update_codex"
+		"update_conductor"
+		"update_crossover"
+		"update_discord"
 		"update_docker"
-		# "update_draw_things"
-		# "update_figma"
+		"update_draw_things"
+		"update_figma"
 		"update_flutter"
-		# "update_frame0"
-		"update_git 'main' 'olankens' 'olankens@users.noreply.github.com'"
-		# "update_handy"
+		"update_frame0"
+		"update_git"
+		"update_headroom"
 		"update_icon_composer"
 		"update_iina"
 		"update_intellij_idea"
 		"update_jdownloader"
-		# "update_joal_desktop"
+		"update_joal_desktop"
 		"update_keepingyouawake"
 		"update_keka"
 		"update_miniforge"
 		"update_mole"
 		"update_nightlight"
 		"update_nodejs"
-		# "update_notion"
+		"update_notion"
 		"update_pearcleaner"
-		# "update_postgresql"
-		# "update_pycharm"
-		# "update_orca"
+		"update_postgresql"
+		"update_orca"
 		"update_recordly"
-		# "update_temurin"
-		# "update_transmission"
+		"update_temurin"
+		"update_transmission"
 		"update_utm"
-		# "update_webstorm"
+		"update_vscodium"
 		# "update_xcode"
 		#
 		"update_devtools_android"
