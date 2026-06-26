@@ -1042,8 +1042,8 @@ update_appearance() {
 	append_dock_application "/Applications/Xcode.app"
 	# --
 	append_dock_application "/Applications/Air.app"
-	append_dock_application "/Applications/Conductor.app"
-	append_dock_application "/Applications/Orca.app"
+	# append_dock_application "/Applications/Conductor.app"
+	# append_dock_application "/Applications/Orca.app"
 	# --
 	append_dock_application "/Applications/Figma.app"
 	# append_dock_application "/Applications/Frame0.app"
@@ -1055,7 +1055,7 @@ update_appearance() {
 	# --
 	append_dock_application "/Applications/CrossOver.app"
 	append_dock_application "/Applications/Pearcleaner.app"
-	append_dock_application "/Applications/UTM.app"
+	# append_dock_application "/Applications/UTM.app"
 	# append_dock_application "/System/Applications/Utilities/Activity Monitor.app"
 	# append_dock_application "/System/Applications/Utilities/Screenshot.app"
 	append_dock_application "/System/Applications/Utilities/Terminal.app"
