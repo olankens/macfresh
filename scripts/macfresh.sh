@@ -1496,10 +1496,10 @@ update_headroom() {
 
 	# Update package
 	pipx ensurepath
-	pipx upgrade headroom-ai || pipx install headroom-ai
+	pipx upgrade "headroom-ai[all]" || pipx install "headroom-ai[all]"
 
-	# TODO: Update settings
-	source "$HOME/.zshrc"
+	# Finish install
+	headroom install apply --preset persistent-service --providers auto
 
 }
 
@@ -2262,6 +2262,7 @@ update_devtools_spring() {
 	update_docker
 	update_intellij_idea
 	update_vscodium
+	update_brew arconia-io/tap/arconia-cli
 	update_brew spring-io/tap/spring-boot
 
 	# Update antigravity
