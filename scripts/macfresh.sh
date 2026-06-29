@@ -1114,12 +1114,28 @@ update_calibre() {
 	invoke_once "calibre"
 
 	# Update goodreads
-	local program="/Applications/calibre.app/Contents/MacOS/calibre-customize"
-	local version="1.8.3" # TODO: Scrape the latest version from github api
+	local version="1.8.5" # TODO: Scrape the latest version from GitHub API
 	local address="https://github.com/kiwidude68/calibre_plugins/releases/download/goodreads-v${version}/goodreads-v${version}.zip"
 	local archive=$(mktemp -d)/$(basename "$address") && curl -LA "mozilla/5.0" "$address" -o "$archive"
+	local program="/Applications/calibre.app/Contents/MacOS/calibre-customize"
 	"$program" --add-plugin "$archive"
 	"$program" --enable-plugin "Goodreads"
+
+	# Update kobo-metadata
+	local version="1.13.1" # TODO: Scrape the latest version from GitHub API
+	local address="https://github.com/NotSimone/Kobo-Metadata/releases/download/${version}/KoboMetadata.zip"
+	local archive=$(mktemp -d)/$(basename "$address") && curl -LA "mozilla/5.0" "$address" -o "$archive"
+	local program="/Applications/calibre.app/Contents/MacOS/calibre-customize"
+	"$program" --add-plugin "$archive"
+	"$program" --enable-plugin "KoboMetadata"
+
+	# Update resize-cover
+	local version="1.2.2" # TODO: Scrape the latest version from GitHub API
+	local address="https://github.com/kiwidude68/calibre_plugins/releases/download/resize_cover-${version}/resize_cover-${version}.zip"
+	local archive=$(mktemp -d)/$(basename "$address") && curl -LA "mozilla/5.0" "$address" -o "$archive"
+	local program="/Applications/calibre.app/Contents/MacOS/calibre-customize"
+	"$program" --add-plugin "$archive"
+	"$program" --enable-plugin "KoboMetadata"
 
 	# Change appearance
 	sudo /usr/libexec/PlistBuddy -c "Set :CFBundleName Calibre" /Applications/calibre.app/Contents/Info.plist 2>/dev/null
