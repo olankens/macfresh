@@ -508,6 +508,19 @@ update_antigravity() {
 
 }
 
+# @define Update bruno
+update_bruno() {
+
+	return 0
+
+	# Update package
+	update_cask bruno
+
+	# Change appearance
+	change_icon "bruno" "/Applications/Bruno.app"
+
+}
+
 # @define Update capcut
 update_capcut() {
 
@@ -1271,17 +1284,6 @@ update_appearance() {
 
 }
 
-# @define Update bruno
-update_bruno() {
-
-	# Update package
-	update_cask bruno
-
-	# Change appearance
-	change_icon "bruno" "/Applications/Bruno.app"
-
-}
-
 # @define Update calibre
 update_calibre() {
 
@@ -1954,6 +1956,17 @@ update_pearcleaner() {
 
 }
 
+# @define Update postman
+update_postman() {
+
+	# Update package
+	update_cask postman
+
+	# Change appearance
+	change_icon "postman" "/Applications/Postman.app"
+
+}
+
 # @define Update recordly
 update_recordly() {
 
@@ -2360,7 +2373,6 @@ main() {
 		#################################################################
 		"update_android_cmdline"
 		"update_android_studio"
-		"update_bruno"
 		"update_calibre"
 		"update_chromium"
 		"update_chromium_debug"
