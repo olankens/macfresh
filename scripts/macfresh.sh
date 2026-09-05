@@ -452,7 +452,20 @@ verify_security() {
 
 #endregion
 
-# region ARCHAICAL
+#region ARCHAICAL
+
+# @define Update air
+update_air() {
+
+	return 0
+
+	# Update package
+	update_cask jetbrains-air
+
+	# Change appearance
+	change_icon "air" "/Applications/Air.app"
+
+}
 
 # @define Update antigravity
 update_antigravity() {
@@ -563,6 +576,58 @@ update_conductor() {
 
 }
 
+# @define Update crossover
+update_crossover() {
+
+	return 0
+
+	# Update package
+	local present="$([[ -d "/Applications/CrossOver.app" ]] && echo true || echo false)"
+	update_cask crossover
+	xattr -rd com.apple.quarantine "/Applications/CrossOver.app"
+
+	# Change settings
+	defaults write com.codeweavers.CrossOver AskForRatings -bool false
+	defaults write com.codeweavers.CrossOver SUAutomaticallyUpdate -bool false
+	defaults write com.codeweavers.CrossOver SUEnableAutomaticChecks -bool false
+	defaults write com.codeweavers.CrossOver SUHasLaunchedBefore -bool true
+
+	# Finish install
+	[[ "$present" == "false" ]] && invoke_once "CrossOver"
+	setopt nullglob && local bottles=("$HOME/Library/Application Support/CrossOver/Bottles"/*)
+	while true; do
+		pids=$(pgrep -f "CrossOver")
+		[ -z "$pids" ] && break
+		kill -9 "$pids" >/dev/null 2>&1
+		sleep 4
+	done
+	local configs="$HOME/Library/Preferences/com.codeweavers.CrossOver.plist"
+	while /usr/libexec/PlistBuddy -c "Print :FirstRunDate" "$configs" &>/dev/null; do
+		defaults delete com.codeweavers.CrossOver FirstRunDate
+		plutil -remove FirstRunDate "$configs" &>/dev/null
+		sleep 2
+	done
+	IFS=$'\n'
+	find "$bottles" -type d -maxdepth 0 -print0 | while IFS= read -r -d '' i; do
+		[ -d "$i" ] || continue
+		while grep -q '\[Software\\\\CodeWeavers\\\\CrossOver\\\\cxoffice\]' "$i/system.reg"; do
+			sed -i '' '/\[Software\\\\CodeWeavers\\\\CrossOver\\\\cxoffice\].*/,+5d' "$i/system.reg"
+			sleep 1
+		done
+	done
+
+	# Change appearance
+	change_icon "crossover" "/Applications/CrossOver.app"
+	if [[ -d "$HOME/Applications/CrossOver/Steam/Steam.app" ]]; then
+		local address="https://github.com/olankens/obscured/raw/refs/heads/main/source/steam/steam.icns"
+		local picture="$(mktemp -d)/$(basename "$address")"
+		curl -LA "mozilla/5.0" "$address" -o "$picture"
+		fileicon set "$HOME/Applications/CrossOver/Steam/Steam.app" "$picture" || sudo !!
+		fileicon set "$HOME/Applications/CrossOver/Steam/Steam.app/Contents/Resources/CrossOverHelper.icns" "$picture" || sudo !!
+	fi
+
+}
+
 # @define Update discord
 update_discord() {
 
@@ -606,23 +671,6 @@ update_frame0() {
 
 	# Change appearance
 	change_icon "frame0" "/Applications/Frame0.app"
-
-}
-
-# @define Update gamehub
-update_gamehub() {
-
-	return 0
-
-	# Update package
-	update_cask gamehub
-
-	# Change appearance
-	local address="https://github.com/olankens/obscured/raw/refs/heads/main/source/gamehub/gamehub.icns"
-	local picture="$(mktemp -d)/$(basename "$address")"
-	curl -LA "mozilla/5.0" "$address" -o "$picture"
-	fileicon set "/Applications/GameHub.app" "$picture" || sudo !!
-	cp "$picture" "/Applications/GameHub.app/Contents/Resources/icon.icns"
 
 }
 
@@ -1199,17 +1247,6 @@ update_chromium_extension() {
 
 #region UPGRADING
 
-# @define Update air
-update_air() {
-
-	# Update package
-	update_cask jetbrains-air
-
-	# Change appearance
-	change_icon "air" "/Applications/Air.app"
-
-}
-
 # @define Update android-cmdline
 update_android_cmdline() {
 
@@ -1354,9 +1391,7 @@ update_appearance() {
 	# append_dock_application "/System/Applications/Utilities/Activity Monitor.app"
 	# append_dock_application "/System/Applications/Utilities/Screenshot.app"
 	append_dock_application "/System/Applications/Utilities/Terminal.app"
-	append_dock_application "/Applications/CrossOver.app"
-	append_dock_application "$HOME/Applications/CrossOver/Steam/Steam.app"
-	# append_dock_application "/Applications/GameHub.app"
+	append_dock_application "/Applications/GameHub.app"
 	append_dock_folder "$HOME/Downloads" 1 0 2
 	append_dock_folder "$HOME/Documents" 1 0 2
 	killall Dock
@@ -1550,56 +1585,6 @@ update_claude_code() {
 
 }
 
-# @define Update crossover
-update_crossover() {
-
-	# Update package
-	local present="$([[ -d "/Applications/CrossOver.app" ]] && echo true || echo false)"
-	update_cask crossover
-	xattr -rd com.apple.quarantine "/Applications/CrossOver.app"
-
-	# Change settings
-	defaults write com.codeweavers.CrossOver AskForRatings -bool false
-	defaults write com.codeweavers.CrossOver SUAutomaticallyUpdate -bool false
-	defaults write com.codeweavers.CrossOver SUEnableAutomaticChecks -bool false
-	defaults write com.codeweavers.CrossOver SUHasLaunchedBefore -bool true
-
-	# Finish install
-	[[ "$present" == "false" ]] && invoke_once "CrossOver"
-	setopt nullglob && local bottles=("$HOME/Library/Application Support/CrossOver/Bottles"/*)
-	while true; do
-		pids=$(pgrep -f "CrossOver")
-		[ -z "$pids" ] && break
-		kill -9 "$pids" >/dev/null 2>&1
-		sleep 4
-	done
-	local configs="$HOME/Library/Preferences/com.codeweavers.CrossOver.plist"
-	while /usr/libexec/PlistBuddy -c "Print :FirstRunDate" "$configs" &>/dev/null; do
-		defaults delete com.codeweavers.CrossOver FirstRunDate
-		plutil -remove FirstRunDate "$configs" &>/dev/null
-		sleep 2
-	done
-	IFS=$'\n'
-	find "$bottles" -type d -maxdepth 0 -print0 | while IFS= read -r -d '' i; do
-		[ -d "$i" ] || continue
-		while grep -q '\[Software\\\\CodeWeavers\\\\CrossOver\\\\cxoffice\]' "$i/system.reg"; do
-			sed -i '' '/\[Software\\\\CodeWeavers\\\\CrossOver\\\\cxoffice\].*/,+5d' "$i/system.reg"
-			sleep 1
-		done
-	done
-
-	# Change appearance
-	change_icon "crossover" "/Applications/CrossOver.app"
-	if [[ -d "$HOME/Applications/CrossOver/Steam/Steam.app" ]]; then
-		local address="https://github.com/olankens/obscured/raw/refs/heads/main/source/steam/steam.icns"
-		local picture="$(mktemp -d)/$(basename "$address")"
-		curl -LA "mozilla/5.0" "$address" -o "$picture"
-		fileicon set "$HOME/Applications/CrossOver/Steam/Steam.app" "$picture" || sudo !!
-		fileicon set "$HOME/Applications/CrossOver/Steam/Steam.app/Contents/Resources/CrossOverHelper.icns" "$picture" || sudo !!
-	fi
-
-}
-
 # @define Update docker
 update_docker() {
 
@@ -1671,6 +1656,24 @@ update_flutter() {
 	if [[ -d "/Applications/Chromium.app" ]]; then
 		append_environment "CHROME_EXECUTABLE" 'export CHROME_EXECUTABLE="/Applications/Chromium.app/Contents/MacOS/Chromium"'
 	fi
+
+}
+
+# @define Update gamehub
+update_gamehub() {
+
+	# Update package
+	update_cask gamehub
+
+	# Change appearance
+	local address="https://github.com/olankens/obscured/raw/refs/heads/main/source/gamehub/gamehub.icns"
+	local picture="$(mktemp -d)/$(basename "$address")"
+	curl -LA "mozilla/5.0" "$address" -o "$picture"
+	fileicon set "/Applications/GameHub.app" "$picture" || sudo !!
+	cp "$picture" "/Applications/GameHub.app/Contents/Resources/icon.icns"
+	sudo xattr -cr "/Applications/GameHub.app"
+	sudo codesign --remove-signature "/Applications/GameHub.app"
+	sudo codesign --deep --sign - "/Applications/GameHub.app"
 
 }
 
@@ -2503,18 +2506,17 @@ main() {
 		"update_homebrew"
 		"update_system"
 		#################################################################
-		"update_air"
 		"update_android_cmdline"
 		"update_android_studio"
 		"update_calibre"
 		"update_chromium"
 		"update_chromium_debug"
 		"update_claude_code"
-		"update_crossover"
 		"update_docker"
 		"update_dotnet"
 		"update_figma"
 		"update_flutter"
+		"update_gamehub"
 		"update_git"
 		"update_headroom"
 		"update_iina"
