@@ -1366,7 +1366,6 @@ update_appearance() {
 	defaults delete com.apple.dock persistent-apps
 	defaults delete com.apple.dock persistent-others
 	append_dock_application "/Applications/Chromium.app"
-	# append_dock_application "/Applications/Discord.app"
 	append_dock_application "/Applications/JDownloader 2/JDownloader2.app"
 	append_dock_application "/Applications/Transmission.app"
 	# --
@@ -1581,11 +1580,16 @@ update_claude_code() {
 	append_environment "CLAUDE_CODE_MAX_OUTPUT_TOKENS" \
 		'export CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000'
 
+	# Update marketplaces
+	claude plugin marketplace add anthropics/claude-plugins-official && claude plugin marketplace update claude-plugins-official
+	claude plugin marketplace add DietrichGebert/ponytail && claude plugin marketplace update ponytail
+
 	# Update plugins
-	claude plugin marketplace add anthropics/claude-plugins-official
-	claude plugin install code-review@claude-plugins-official
-	claude plugin install github@claude-plugins-official
-	claude plugin install security-guidance@claude-plugins-official
+	claude plugin install code-review@claude-plugins-official && claude plugin update code-review
+	claude plugin install github@claude-plugins-official && claude plugin update github
+	claude plugin install security-guidance@claude-plugins-official && claude plugin update security-guidance
+	claude plugin install superpowers@claude-plugins-official && claude plugin update superpowers
+	claude plugin install ponytail@ponytail && claude plugin update ponytail
 
 }
 
