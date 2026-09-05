@@ -1577,6 +1577,10 @@ update_claude_code() {
 	jq ".hasCompletedOnboarding = true" "$configs" | sponge "$configs"
 	jq ".includeCoAuthoredBy = false" "$configs" | sponge "$configs"
 
+	# Change environment
+	append_environment "CLAUDE_CODE_MAX_OUTPUT_TOKENS" \
+		'export CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000'
+
 	# Update plugins
 	claude plugin marketplace add anthropics/claude-plugins-official
 	claude plugin install code-review@claude-plugins-official
@@ -2346,6 +2350,7 @@ update_devtools_claude_code() {
 					args: ["acp"]
 				}
 		' "$configs" | sponge "$configs"
+		idea installPlugins "com.intellij.ml.llm"
 	fi
 
 	# Update visual-studio-code
