@@ -2300,12 +2300,16 @@ update_devtools_claude_code() {
 		# sed -i "" -e 's|^export ROUTATIC_PROXY_API_KEY=.*|export ROUTATIC_PROXY_API_KEY="YOUR_OPENCODE_API_KEY"|' "$HOME/.zshrc"
 		routatic-proxy init
 		local configs="$HOME/.config/routatic-proxy/config.json"
-		jq '.enable_streaming_scenario_routing = true' "$configs" sponge "$configs"
-		# jq '.model_family_overrides.opus.model_id = "deepseek-v4-pro"' "$configs" sponge "$configs"
-		# jq '.model_family_overrides.sonnet.model_id = "kimi-k2.7-code"' "$configs" sponge "$configs"
-		jq 'del(.model_family_overrides)' ~/.config/routatic-proxy/config.json | sponge ~/.config/routatic-proxy/config.json
-		routatic-proxy autostart enable
+		jq '.enable_streaming_scenario_routing = true' "$configs" | sponge "$configs"
+		# jq '.model_family_overrides.opus.model_id = "deepseek-v4-pro"' "$configs" | sponge "$configs"
+		# jq '.model_family_overrides.sonnet.model_id = "kimi-k2.7-code"' "$configs" | sponge "$configs"
+		# jq '.model_family_overrides.haiku.model_id = "glm-5.3-flash"' "$configs" | sponge "$configs"
+		jq '.model_family_overrides.opus.model_id = "glm-5.3-flash"' "$configs" | sponge "$configs"
+		jq '.model_family_overrides.sonnet.model_id = "glm-5.3-flash"' "$configs" | sponge "$configs"
+		jq '.model_family_overrides.haiku.model_id = "glm-5.3-flash"' "$configs" | sponge "$configs"
+		# jq 'del(.model_family_overrides)' ~/.config/routatic-proxy/config.json | sponge ~/.config/routatic-proxy/config.json
 		headroom install apply --preset persistent-service --scope provider --providers auto
+		routatic-proxy autostart enable
 	fi
 
 	# Handle zai
