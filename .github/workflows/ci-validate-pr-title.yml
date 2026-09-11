@@ -1,0 +1,23 @@
+name: "📘 : Validate PR Title"
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+permissions:
+  contents: read
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          cat > commitlint.config.cjs <<'EOF'
+          module.exports = {
+            extends: ['@commitlint/config-conventional'],
+            rules: {
+              'header-case': [2, 'always', 'lower-case'],
+            },
+          };
+          EOF
+      - env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "$PR_TITLE" | npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint

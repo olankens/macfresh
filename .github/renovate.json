@@ -1,0 +1,27 @@
+{
+  "extends": [
+    "config:recommended"
+  ],
+  "commitMessageLowerCase": "auto",
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": true
+    }
+  ]
+}

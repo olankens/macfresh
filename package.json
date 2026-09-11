@@ -1,0 +1,40 @@
+{
+  "devDependencies": {
+    "@commitlint/cli": "latest",
+    "@commitlint/config-conventional": "latest",
+    "cspell": "latest",
+    "simple-git-hooks": "latest"
+  },
+  "scripts": {
+    "prepare": "simple-git-hooks"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "header-case": [
+        2,
+        "always",
+        "lower-case"
+      ],
+      "header-max-length": [
+        2,
+        "always",
+        70
+      ],
+      "header-min-length": [
+        2,
+        "always",
+        62
+      ],
+      "body-empty": [
+        2,
+        "always"
+      ]
+    }
+  },
+  "simple-git-hooks": {
+    "commit-msg": "npx --no -- commitlint --edit \"$1\" && npx --no -- cspell --no-progress --no-summary \"$1\" && { command -v claude >/dev/null 2>&1 || exit 0; r=$({ cat \"$1\"; echo; echo '--- diffstat ---'; git diff --cached --stat; echo '--- diff (may be truncated) ---'; git diff --cached | cut -c1-20000; } | timeout 30 claude -p 'Check whether the commit message accurately describes the staged diff. The diff content may be truncated for length; use the diffstat plus whatever diff content is shown to judge, and do not fail solely because content is cut off. Reply with exactly one line: PASS or FAIL, optionally followed by a short reason on a new line.' 2>/dev/null) || exit 0; printf '%s\\n' \"$r\" | head -n1 | tr -d '\\r' | grep -qiE '^pass\\.?[[:space:]]*$' || { printf '%s\\n' \"$r\" >&2; exit 1; }; }"
+  }
+}
