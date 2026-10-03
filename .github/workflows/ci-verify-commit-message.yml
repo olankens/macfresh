@@ -1,0 +1,30 @@
+name: "📘 : Verify Commit Message"
+on:
+  push:
+    branches: ["**"]
+permissions:
+  contents: read
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - env:
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          cat > "$RUNNER_TEMP/commitlint.config.cjs" <<'EOF'
+            module.exports = {
+              extends: ['@commitlint/config-conventional'],
+              rules: {
+                'header-case': [2, 'always', 'lower-case']
+              },
+            };
+          EOF
+          if [[ "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
+            git show --format='%B' --no-patch "$SHA" | npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config "$RUNNER_TEMP/commitlint.config.cjs"
+          else
+            npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config "$RUNNER_TEMP/commitlint.config.cjs" --from "$BEFORE" --to "$SHA"
+          fi

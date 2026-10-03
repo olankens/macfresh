@@ -1,0 +1,77 @@
+name: "📗 : Create Release"
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      prs_created: ${{ steps.release.outputs.prs_created }}
+      pr: ${{ steps.release.outputs.pr }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: release-please-oss/release-please-action@v6
+        id: release
+        with:
+          release-type: simple
+          config-overrides-json: |
+            {
+              "changelog-sections": [
+                { "type": "feat", "section": "FEATURES" },
+                { "type": "fix", "section": "BUGFIXES" },
+                { "type": "build", "section": "APPENDIX" },
+                { "type": "chore", "section": "APPENDIX" },
+                { "type": "ci", "section": "APPENDIX" },
+                { "type": "docs", "section": "APPENDIX" },
+                { "type": "perf", "section": "APPENDIX" },
+                { "type": "refactor", "section": "APPENDIX" },
+                { "type": "revert", "section": "APPENDIX" },
+                { "type": "style", "section": "APPENDIX" },
+                { "type": "test", "section": "APPENDIX" }
+              ],
+              "bump-minor-pre-major": true,
+              "pull-request-title-pattern": "chore: bump project version to ${version} and update the changelog",
+              "pull-request-header": " ",
+              "pull-request-footer": " ",
+              "extra-files": ["scripts/macfresh.sh"]
+            }
+      - if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ steps.release.outputs.tag_name }}" scripts/macfresh.sh
+  prepare:
+    runs-on: ubuntu-latest
+    needs: release
+    if: ${{ needs.release.outputs.prs_created == 'true' }}
+    steps:
+      - uses: actions/checkout@v7
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ needs.release.outputs.pr }}
+        run: |
+          PR_NUMBER=$(printf '%s' "$PR" | jq -r '.number')
+          BRANCH=$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json headRefName -q .headRefName)
+          gh pr checkout "$PR_NUMBER" --repo "$GH_REPO"
+          sed -i 's/^# Changelog$/# CHANGELOG/' CHANGELOG.md
+          sed -i 's/^### ⚠ BREAKING CHANGES$/### BREAKING/' CHANGELOG.md
+          awk '/^---+$/ { next } /^## / && seen++ { print "---"; print "" } { print }' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
+          cat -s CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
+          if ! git diff --quiet -- CHANGELOG.md; then
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git add CHANGELOG.md
+            git commit --amend --no-edit
+            git push --force-with-lease origin "HEAD:$BRANCH"
+          fi
+          gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json body -q .body \
+            | sed 's/^### ⚠ BREAKING CHANGES$/### BREAKING/' \
+            | gh pr edit "$PR_NUMBER" --repo "$GH_REPO" --body-file -
