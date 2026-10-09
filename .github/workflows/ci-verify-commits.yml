@@ -1,0 +1,38 @@
+name: "📘 : Verify Commits"
+on:
+  push:
+    branches: [ "**" ]
+permissions:
+  contents: read
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - env:
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          cat > "$RUNNER_TEMP/commitlint.config.cjs" <<'EOF'
+            module.exports = {
+              extends: ['@commitlint/config-conventional'],
+              rules: {
+                'header-case': [2, 'always', 'lower-case']
+              },
+            };
+          EOF
+          if [[ "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
+            commits="$(git rev-list --reverse "$SHA")"
+          elif git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            commits="$(git rev-list --reverse "$BEFORE..$SHA")"
+          else
+            commits="$SHA"
+          fi
+          if [[ -z "$commits" ]]; then
+            exit 0
+          fi
+          while read -r commit; do
+            git show --format='%B' --no-patch "$commit" | npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --config "$RUNNER_TEMP/commitlint.config.cjs"
+          done <<< "$commits"

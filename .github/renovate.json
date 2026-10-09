@@ -1,0 +1,11 @@
+{
+  "extends": ["config:recommended"],
+  "commitMessageLowerCase": "auto",
+  "platformCommit": "enabled",
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    }
+  ]
+}
