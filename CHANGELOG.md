@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [1.1.1](https://github.com/olankens/macfresh/compare/v1.1.0...v1.1.1) (2026-10-09)
+
+### BUGFIXES
+
+* suppress homebrew shellenv stderr in invoke wrapper polling loop ([36498b9](https://github.com/olankens/macfresh/commit/36498b9939000d0ff78aa53d4fadd65a1b6720b5))
+
+---
+
 ## [1.1.0](https://github.com/olankens/macfresh/compare/v1.0.0...v1.1.0) (2026-10-09)
 
 ### FEATURES
