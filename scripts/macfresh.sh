@@ -2138,6 +2138,9 @@ update_devtools_claude_code() {
 		[[ -s "$configs" ]] || echo "{}" >"$configs"
 		jq '."chat.agentHost.allowSignedOutWhenUsable" = true' "$configs" | sponge "$configs"
 		jq '."chat.byokUtilityModelDefault" = "mainAgent"' "$configs" | sponge "$configs"
+		jq '."chat.defaultToCopilotHarness" = false' "$configs" | sponge "$configs"
+		jq '."chat.editor.localAgent.enabled" = true' "$configs" | sponge "$configs"
+		jq '."chat.editor.preferCopilotHarness" = false' "$configs" | sponge "$configs"
 	fi
 
 }
