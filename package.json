@@ -9,7 +9,11 @@
     "prepare": "simple-git-hooks"
   },
   "cspell": {
-    "words": []
+    "words": [
+      "commandlinetools",
+      "photocraft",
+      "vectorcraft"
+    ]
   },
   "commitlint": {
     "extends": ["@commitlint/config-conventional"],

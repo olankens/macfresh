@@ -1039,7 +1039,7 @@ update_appearance() {
 	defaults write com.apple.dock orientation bottom
 	defaults write com.apple.dock show-recents -bool false
 	defaults write com.apple.dock size-immutable -bool yes
-	defaults write com.apple.dock tilesize -int 48
+	defaults write com.apple.dock tilesize -int 40
 	defaults write com.apple.dock wvous-bl-corner -int 0
 	defaults write com.apple.dock wvous-br-corner -int 0
 	defaults write com.apple.dock wvous-tl-corner -int 0
@@ -1062,6 +1062,8 @@ update_appearance() {
 	append_dock_application "/Applications/UTM.app"
 	append_dock_application "/Applications/Figma.app"
 	append_dock_application "/Applications/Xcode.app/Contents/Applications/Icon Composer.app"
+	append_dock_application "/Applications/PhotoCraft.app"
+	append_dock_application "/Applications/VectorCraft.app"
 	append_dock_application "/Applications/DaVinci Resolve/DaVinci Resolve.app"
 	append_dock_application "/Applications/IINA.app"
 	append_dock_application "/Applications/OBS.app"
@@ -1402,11 +1404,14 @@ update_headroom() {
 update_homebrew() {
 
 	# Handle dependencies
-	sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-	local package="$(softwareupdate -l 2>&1 | grep '\*.*Command Line Tools' | head -1 | sed 's/^[*[:space:]]*//; s/^Label: //')"
-	sudo softwareupdate -i "$package"
-	sudo xcode-select --switch /Library/Developer/CommandLineTools
-	sudo rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+	local cmtools="/Library/Developer/CommandLineTools"
+	if [[ ! -d "$cmtools" || -z "$(ls -A "$cmtools")" ]]; then
+		sudo touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+		local package="$(softwareupdate -l 2>&1 | grep '\*.*Command Line Tools' | head -1 | sed 's/^[*[:space:]]*//; s/^Label: //')"
+		sudo softwareupdate -i "$package"
+		sudo xcode-select --switch "$cmtools"
+		sudo rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+	fi
 
 	# Update package
 	local command=$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
@@ -1718,6 +1723,21 @@ update_passwords() {
 
 }
 
+# @define Update photocraft
+update_photocraft() {
+
+	# Update package
+	local present="$([[ -d "/Applications/PhotoCraft.app" ]] && echo true || echo false)"
+	update_cask photocraft
+
+	# Finish install
+	[[ "$present" == "false" ]] && invoke_once "PhotoCraft"
+
+	# Change appearance
+	change_icon "photocraft" "/Applications/PhotoCraft.app"
+
+}
+
 # @define Update postman
 update_postman() {
 
@@ -1855,6 +1875,21 @@ update_transmission() {
 
 	# Change appearance
 	change_icon "transmission" "/Applications/Transmission.app"
+
+}
+
+# @define Update vectorcraft
+update_vectorcraft() {
+
+	# Update package
+	local present="$([[ -d "/Applications/VectorCraft.app" ]] && echo true || echo false)"
+	update_cask vectorcraft
+
+	# Finish install
+	[[ "$present" == "false" ]] && invoke_once "VectorCraft"
+
+	# Change appearance
+	change_icon "vectorcraft" "/Applications/VectorCraft.app"
 
 }
 
@@ -2298,11 +2333,13 @@ main() {
 		"update_notion"
 		"update_obs"
 		"update_passwords"
+		"update_photocraft"
 		"update_postman"
 		"update_powershell"
 		"update_rclone"
 		"update_temurin"
 		"update_transmission"
+		"update_vectorcraft"
 		"update_utm"
 		"update_visual_studio_code"
 		"update_xcode"
