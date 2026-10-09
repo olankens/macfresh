@@ -2299,7 +2299,7 @@ main() {
 	[[ "$ZSH_EVAL_CONTEXT" != *:file || "$TERM_PROGRAM" == "vscode" || $(ps -p $PPID -o comm=) =~ idea ]] || return 0
 
 	local heading="MACFRESH"
-	local version="1.0.0" # x-release-please-version
+	local version="1.1.0" # x-release-please-version
 	local website="https://github.com/olankens/macfresh"
 	local maximum="91"
 	local country="Europe/Brussels"
